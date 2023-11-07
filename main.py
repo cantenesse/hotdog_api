@@ -8,8 +8,9 @@ import boto3
 
 app = FastAPI()
 
+
 def get_model_from_s3():
-    s3 = boto3.client('s3')
+    s3 = boto3.client("s3")
     bucket_name = "hotdognothotdogmodel"
     s3_file_path = "model_inception_resnet_v2.h5"
     local_file_path = "model_inception_resnet_v2.h5"
@@ -17,13 +18,17 @@ def get_model_from_s3():
     model = load_model("model_inception_resnet_v2.h5")
 
     return model
+
+
 def load_image(image_file):
     img_width, img_height = 256, 256
-    img = image.load_img(image_file, target_size = (img_width, img_height))
+    img = image.load_img(image_file, target_size=(img_width, img_height))
     img = image.img_to_array(img)
-    img = np.expand_dims(img, axis = 0)
+    img = np.expand_dims(img, axis=0)
 
     return img
+
+
 def predict_hotdog(file):
     img = load_image(file)
     prediction = model.predict(img).flatten()
@@ -36,6 +41,7 @@ def predict_hotdog(file):
 
     return is_hot_dog
 
+
 @app.post("/hotdog/")
 async def hotdog_endpoint(file: UploadFile = File(...)):
     file_contents = await file.read()
@@ -43,8 +49,10 @@ async def hotdog_endpoint(file: UploadFile = File(...)):
     is_hot_dog = predict_hotdog(file_like)
     return {"hotdog": is_hot_dog}
 
+
 @app.get("/")
 async def get_endpoint():
     return {"status": True}
+
 
 model = get_model_from_s3()
